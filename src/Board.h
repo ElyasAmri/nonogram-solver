@@ -10,14 +10,13 @@
 #include <algorithm>
 #include <iterator>
 #include <iostream>
-#include "Cell.h"
 #include "Line.h"
 
 using namespace std;
 
 
 class Board {
-    map<pair<int, int>, Cell> cells;
+    map<pair<int, int>, int> cells;
     vector<Line> hLines;
     vector<Line> vLines;
 
@@ -36,11 +35,11 @@ public:
 
         for (int i = 0; i < 5; ++i)
         for (int j = 0; j < 5; ++j)
-                cells.insert({{i, j}, Cell()});
+                cells.insert({{i, j}, -1});
 
         for (int i = 0; i < 5; ++i) {
-            vector<Cell*> line1(5);
-            vector<Cell*> line2(5);
+            vector<int*> line1(5);
+            vector<int*> line2(5);
             for (int j = 0; j < 5; ++j) {
                 line1[j] = &cells[{j, i}];
                 line2[j] = &cells[{i, j}];
@@ -60,7 +59,7 @@ public:
 
             for (int i = 0; i < 5; ++i) {
                 for (int j = 0; j < 5; ++j) {
-                    cout << '|' << hLines[i].cells[j]->value << '|';
+                    cout << '|' << *hLines[i].cells[j] << '|';
                 }
                 cout << endl;
             }
@@ -73,7 +72,7 @@ public:
         for (int i = 0; i < 5; ++i) {
             ret[i].reserve(5);
             for (int j = 0; j < 5; ++j) {
-                ret[i][j] = hLines[i].cells[j]->value;
+                ret[i][j] = *hLines[i].cells[j];
             }
         }
 
@@ -89,8 +88,8 @@ public:
                 if (clue != 0) return false;
             }
             for (int i = 0; i < 5; ++i) {
-                Cell& cell = *line.cells[i];
-                if(cell.value != -1 && cell.value != per[i]) return false;
+                int cell = *line.cells[i];
+                if(cell != -1 && cell != per[i]) return false;
             }
             return true;
         };
@@ -98,10 +97,10 @@ public:
         vector<vector<bool>> checked;
         copy_if(line.possibilities.begin(), line.possibilities.end(), back_inserter(checked), checks);
         for (int i = 0; i < 5; ++i) {
-            if (line.cells[i]->value != -1) continue;
+            if (*line.cells[i] != -1) continue;
             auto sum = 0;
             for (const auto& per: checked) sum += per[i];
-            line.cells[i]->value = sum == 0 ? 0 : sum == checked.size() ? 1 : -1;
+            *line.cells[i] = sum == 0 ? 0 : sum == checked.size() ? 1 : -1;
         }
         line.possibilities = checked;
     }
