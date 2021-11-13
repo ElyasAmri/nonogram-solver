@@ -15,16 +15,9 @@ struct Line {
     vector<int> clues;
     vector<vector<bool>> possibilities;
 
-    [[nodiscard]] bool is_solved() const {
-        return all_of(cells.begin(), cells.end(), [](const int* const cell) {
-            return *cell != -1;
-        });
-    }
+    [[nodiscard]] bool is_solved() const;
 
-    Line(vector<int*> cells, vector<int> clues, vector<vector<bool>> possibilities)
-            : cells(move(cells)),
-              clues(move(clues)),
-              possibilities(move(possibilities)) {}
+    Line(vector<int*> cells, vector<int> clues, vector<vector<bool>> possibilities);
 };
 
 
