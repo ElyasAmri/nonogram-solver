@@ -8,6 +8,8 @@
 #include <map>
 #include <vector>
 #include <algorithm>
+#include <iterator>
+#include <iostream>
 #include "Cell.h"
 #include "Line.h"
 
@@ -23,21 +25,28 @@ public:
     Board() = delete;
 
     Board(vector<vector<int>> hClues, vector<vector<int>> vClues) {
+        vector<vector<bool>> permutations;
+        for (int i = 0; i <= 5; ++i) {
+            vector<bool> per(5, false);
+            fill(per.begin() + i, per.end(), true);
+            do permutations.push_back(per); while (next_permutation(per.begin(), per.end()));
+        }
+
+        cout << permutations.size() << endl;
+
         for (int i = 0; i < 5; ++i)
-            for (int j = 0; j < 5; ++j)
+        for (int j = 0; j < 5; ++j)
                 cells.insert({{i, j}, Cell()});
 
         for (int i = 0; i < 5; ++i) {
-            Line line1;
-            Line line2;
+            vector<Cell*> line1(5);
+            vector<Cell*> line2(5);
             for (int j = 0; j < 5; ++j) {
-                line1.cells.push_back(&cells[{j, i}]);
-                line2.cells.push_back(&cells[{i, j}]);
+                line1[j] = &cells[{j, i}];
+                line2[j] = &cells[{i, j}];
             }
-            line1.clues = vClues[i];
-            line2.clues = hClues[i];
-            hLines.push_back(line1);
-            vLines.push_back(line2);
+            hLines.emplace_back(line1, vClues[i], permutations);
+            vLines.emplace_back(line2, hClues[i], permutations);
         }
     }
 
@@ -46,13 +55,55 @@ public:
         while (!(
                 all_of(hLines.begin(), hLines.end(), solved) &&
                 all_of(vLines.begin(), vLines.end(), solved))) {
-            for (const auto &line : hLines) {
-                line.resolve();
+            for (auto& line: hLines) resolve(line);
+            for (auto& line: vLines) resolve(line);
+
+            for (int i = 0; i < 5; ++i) {
+                for (int j = 0; j < 5; ++j) {
+                    cout << '|' << hLines[i].cells[j]->value << '|';
+                }
+                cout << endl;
             }
-            for (const auto &line : vLines) {
-                line.resolve();
+
+            cout << "---------------\n\n";
+
+        }
+
+        vector<vector<bool>> ret(5);
+        for (int i = 0; i < 5; ++i) {
+            ret[i].reserve(5);
+            for (int j = 0; j < 5; ++j) {
+                ret[i][j] = hLines[i].cells[j]->value;
             }
         }
+
+        return ret;
+    }
+
+    void resolve(Line& line) {
+        auto checks = [&line](const vector<bool>& per) {
+            auto it = per.begin();
+            for (auto clue: line.clues) {
+                it = find(it, per.end(), 1);
+                for (;it != per.end() && *it; it++, clue--);
+                if (clue != 0) return false;
+            }
+            for (int i = 0; i < 5; ++i) {
+                Cell& cell = *line.cells[i];
+                if(cell.value != -1 && cell.value != per[i]) return false;
+            }
+            return true;
+        };
+
+        vector<vector<bool>> checked;
+        copy_if(line.possibilities.begin(), line.possibilities.end(), back_inserter(checked), checks);
+        for (int i = 0; i < 5; ++i) {
+            if (line.cells[i]->value != -1) continue;
+            auto sum = 0;
+            for (const auto& per: checked) sum += per[i];
+            line.cells[i]->value = sum == 0 ? 0 : sum == checked.size() ? 1 : -1;
+        }
+        line.possibilities = checked;
     }
 };
 

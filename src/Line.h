@@ -9,15 +9,23 @@
 #include <algorithm>
 #include "Cell.h"
 
-struct Line {
-    std::vector<Cell*> cells;
-    std::vector<int> clues;
+using namespace std;
 
-    bool is_solved() const {
-        return std::all_of(cells.begin(), cells.end(), [](const Cell* const cell) {
+struct Line {
+    vector<Cell*> cells;
+    vector<int> clues;
+    vector<vector<bool>> possibilities;
+
+    [[nodiscard]] bool is_solved() const {
+        return all_of(cells.begin(), cells.end(), [](const Cell* const cell) {
             return cell->value != -1;
         });
     }
+
+    Line(vector<Cell*> cells, vector<int> clues, vector<vector<bool>> possibilities)
+            : cells(move(cells)),
+              clues(move(clues)),
+              possibilities(move(possibilities)) {}
 };
 
 
