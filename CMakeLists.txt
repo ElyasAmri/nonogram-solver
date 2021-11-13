@@ -3,4 +3,8 @@ project(nonogram_solver)
 
 set(CMAKE_CXX_STANDARD 20)
 
-add_executable(nonogram_solver main.cpp)
+add_executable(nonogram_solver main.cpp
+        src/Board.cpp
+        src/Line.cpp
+        src/Cell.cpp
+        )
