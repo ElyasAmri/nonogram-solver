@@ -19,12 +19,14 @@ class Board {
     map<pair<int, int>, int> cells;
     vector<Line> hLines;
     vector<Line> vLines;
+    int width;
+    int height;
 
-    static void resolve(Line& line);
+    static void resolve(Line& line, int side);
 public:
     Board() = delete;
 
-    Board(vector<vector<int>> hClues, vector<vector<int>> vClues);
+    Board(vector<vector<int>> vClues, vector<vector<int>> hClues, int width, int height);
 
     vector<vector<bool>> solve();
 };
