@@ -51,9 +51,8 @@ vector<vector<bool>> Board::solve() {
 
     vector<vector<bool>> ret(5);
     for (int i = 0; i < 5; ++i) {
-        ret[i].reserve(5);
         for (int j = 0; j < 5; ++j) {
-            ret[i][j] = *hLines[i].cells[j];
+            ret[i].push_back(*(hLines[i].cells[j]));
         }
     }
 
@@ -68,6 +67,8 @@ void Board::resolve(Line& line) {
             for (;it != per.end() && *it; it++, clue--);
             if (clue != 0) return false;
         }
+        it = find(it, per.end(), 1);
+        if(it != per.end()) return false;
         for (int i = 0; i < 5; ++i) {
             int cell = *line.cells[i];
             if(cell != -1 && cell != per[i]) return false;
